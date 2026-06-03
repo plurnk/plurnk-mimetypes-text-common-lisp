@@ -23,6 +23,44 @@ export default class TextCommonLisp extends BaseHandler {
             return [];
         }
     }
+
+    // Deep-channel (issue #10). For an S-expression language, the natural
+    // deep-tree is one node per top-level form carrying its head atom (defun,
+    // defmacro, etc.), declared name, and source range. Coarser than a full
+    // S-expression AST (Common Lisp's sub-form structure isn't navigable
+    // anyway — macros transform it freely) but enough for jsonpath like
+    // \$.children[?(@.head=='defun')] to find all function definitions.
+    override deepJson(content: HandlerContent): unknown {
+        if (typeof content !== "string") return null;
+        try {
+            const children = extractForms(content);
+            return { type: "program", line: 1, endLine: children.length > 0
+                ? (children[children.length - 1] as { endLine: number }).endLine
+                : 1, children };
+        } catch {
+            return null;
+        }
+    }
+}
+
+function extractForms(src: string): unknown[] {
+    const out: unknown[] = [];
+    const scanner = new Scanner(src);
+    while (!scanner.eof()) {
+        const form = scanner.readTopLevelForm();
+        if (!form) break;
+        if (form.head) {
+            const node: Record<string, unknown> = {
+                type: form.head,
+                line: form.line,
+                endLine: form.endLine,
+            };
+            if (form.secondAtom !== null) node.name = form.secondAtom;
+            if (form.paramAtoms.length > 0) node.params = form.paramAtoms;
+            out.push(node);
+        }
+    }
+    return out;
 }
 
 // SPEC §3 mapping:

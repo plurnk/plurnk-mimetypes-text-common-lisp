@@ -204,17 +204,18 @@ describe("TextCommonLisp — extract", () => {
 });
 
 describe("TextCommonLisp — framework integration", () => {
-    it("renders extracted hierarchy via format()", () => {
+    it("renders extracted hierarchy via format()", async () => {
         const h = new TextCommonLisp(metadata);
-        const out = h.symbolsRaw("(defun answer () 42)");
+        const out = await h.symbolsRaw("(defun answer () 42)");
         assert.ok(out.includes("function answer"));
     });
 
-    it("inherits jsonpath query against the symbol outline", async () => {
+    it("jsonpath dispatches against the deep-json forms tree (issue #10)", async () => {
         const h = new TextCommonLisp(metadata);
-        const src = "(defun add (a b) (+ a b))";
-        const f = await h.query(src, "jsonpath", "$.add");
-        assert.equal(f.length, 1);
+        const src = "(defun foo () 1)\n(defmacro bar () 2)\n";
+        const forms = await h.query(src, "jsonpath", "$.children[?(@.type=='defun')]");
+        assert.equal(forms.length, 1);
+        assert.equal((forms[0].matched as { name: string }).name, "foo");
     });
 });
 

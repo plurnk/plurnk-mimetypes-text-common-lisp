@@ -1,6 +1,6 @@
 {
     "name": "@plurnk/plurnk-mimetypes-text-common-lisp",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "description": "text/x-common-lisp mimetype handler for plurnk-service. Hand-rolled S-expression scanner (no ANTLR).",
     "type": "module",
     "license": "MIT",
@@ -47,7 +47,7 @@
         "prepublishOnly": "npm run deps:fresh && npm audit --audit-level=moderate && npm test"
     },
     "devDependencies": {
-        "@plurnk/plurnk-mimetypes": "^0.15.34",
+        "@plurnk/plurnk-mimetypes": "0.16.0",
         "@types/node": "^26.0.0",
         "typescript": "^6.0.3"
     },

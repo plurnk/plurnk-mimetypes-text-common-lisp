@@ -3,4 +3,3 @@ dist/
 *.tgz
 *.log
 .DS_Store
-AGENTS.md
